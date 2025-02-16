@@ -26,19 +26,21 @@
 #define DIV 25.0
 #define WRAP 1800
 uint DUTY_C = 0;//Duty Cycle Inicial
-uint sliceB;
-uint sliceR;
+uint sliceB;//Slice PWM azul
+uint sliceR;//Slice PWM vermelho
 
-uint32_t last_print_time = 0; 
-uint32_t last_timeA = 0;
-uint32_t last_timeJ = 0;
+//Variáveis para temporização:
+uint32_t last_print_time = 0;
+uint32_t last_timeA = 0;//Guarda a última vez que o botão A foi pressionado
+uint32_t last_timeJ = 0;//Guarda a última vez que o botão Joystick foi pressionado
 ssd1306_t ssd;
 bool cor = true;
 bool pwm_function = true;//Variável que permite o joystick controlar intensidade dos LEDs
-bool ledg_state;
-bool borda = true;
+bool ledg_state = false;//Indica estado atual do led verde
+//bool borda = true;
 
 static void gpio_irq_handler(uint gpio,uint32_t events){
+    //Se for o botão B põe a placa no modo bootsel
     if(gpio==BUT_B){
         printf("Reiniciando a placa em modo de gravação...\n");
         reset_usb_boot(0,0);
@@ -53,9 +55,10 @@ static void gpio_irq_handler(uint gpio,uint32_t events){
             pwm_function = !pwm_function;//inverte a variável
             pwm_set_enabled(sliceB, pwm_function); //habilita/desabilita o pwm no slice do led azul
             pwm_set_enabled(sliceR, pwm_function); //habilita/desabilita o pwm no slice do led vermelho
-            printf("%s\n",pwm_function?"PWM ATIVADO":"PWM DESATIVADO");
+            printf("%s\n",pwm_function?"PWM ATIVADO":"PWM DESATIVADO");//Para debug
         }
     }
+    
     if (current_time - last_timeJ > 300000){ //debouncing
         
         last_timeJ = current_time;
@@ -63,7 +66,7 @@ static void gpio_irq_handler(uint gpio,uint32_t events){
         if(gpio==BUT_J){
             ledg_state = !ledg_state;
             gpio_put(LED_G,ledg_state);
-            printf("%s\n",ledg_state?"LED VERDE ATIVADO":"LED VERDE DESATIVADO");
+            printf("%s\n",ledg_state?"LED VERDE ATIVADO":"LED VERDE DESATIVADO");//Para debug
         }
     }
 
@@ -76,15 +79,15 @@ int main()
     stdio_init_all();
 
     //Inicializar ADC no joystick
-    joystick_adc_init(joyX,joyY);
+    joystick_adc_init(joyX,joyY);//Biblioteca joystick_pwm.h
 
-    //Configurar i2c e limpar o display
-    ssd1306_init_config_clean(&ssd,I2C_SCL,I2C_SDA,I2C_PORT,I2C_LINK);
+    //Inicializa o i2c, configura a estrutura do display, limpa o display
+    ssd1306_init_config_clean(&ssd,I2C_SCL,I2C_SDA,I2C_PORT,I2C_LINK);//(Função adicionada | "display/ssd136.h")
 
 
     //configura pwm dos LEDs vermelho e azul
-    sliceB = gpio_pwm_config(LED_B,DIV,WRAP,DUTY_C);
-    sliceR = gpio_pwm_config(LED_R,DIV,WRAP,DUTY_C);
+    sliceB = gpio_pwm_config(LED_B,DIV,WRAP,DUTY_C);//Biblioteca joystick_pwm.h
+    sliceR = gpio_pwm_config(LED_R,DIV,WRAP,DUTY_C);//Biblioteca joystick_pwm.h
     pwm_set_enabled(sliceB, pwm_function); //habilita o pwm no slice do led azul
     pwm_set_enabled(sliceR, pwm_function); //habilita o pwm no slice do led vermelho
 
@@ -92,7 +95,7 @@ int main()
     gpio_init(LED_G);
     gpio_set_dir(LED_G,GPIO_OUT);
 
-    //inicializar botões
+    //inicializar botões e interrupções
     gpio_init(BUT_B);
     gpio_set_dir(BUT_B,GPIO_IN); gpio_pull_up(BUT_B);
     gpio_set_irq_enabled_with_callback(BUT_B, GPIO_IRQ_EDGE_FALL, 1, &gpio_irq_handler);
@@ -108,9 +111,9 @@ int main()
     while (true) {
         
         //Ler adc do joystick:
-        adc_select_input(0); 
+        adc_select_input(0); //Ler eixo Y
         uint16_t joyY_value = adc_read(); 
-        adc_select_input(1); 
+        adc_select_input(1); //Ler eixo X
         uint16_t joyX_value = adc_read(); 
         
         //Atualizar posição do quadrado no display:
