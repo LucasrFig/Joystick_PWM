@@ -1,3 +1,4 @@
+//Bibliotecas utilizadas
 #include <stdio.h>
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
@@ -25,21 +26,25 @@
 #define LED_R 13
 #define DIV 25.0
 #define WRAP 1800
-uint DUTY_C = 0;//Duty Cycle Inicial
-uint sliceB;//Slice PWM azul
-uint sliceR;//Slice PWM vermelho
+
 
 //Variáveis para temporização:
-uint32_t last_print_time = 0;
+uint32_t last_print_time = 0;//Guarda última vez que Info do ADC foi impresso
 uint32_t last_timeA = 0;//Guarda a última vez que o botão A foi pressionado
 uint32_t last_timeJ = 0;//Guarda a última vez que o botão Joystick foi pressionado
+
+//Variáveis Globais
 ssd1306_t ssd;
 bool cor = true;
 bool pwm_function = true;//Variável que permite o joystick controlar intensidade dos LEDs
+uint sliceB;//Slice PWM azul
+uint sliceR;//Slice PWM vermelho
 bool ledg_state = false;//Indica estado atual do led verde
-//bool borda = true;
 
+
+//Rotina de Interrupção
 static void gpio_irq_handler(uint gpio,uint32_t events){
+
     //Se for o botão B põe a placa no modo bootsel
     if(gpio==BUT_B){
         printf("Reiniciando a placa em modo de gravação...\n");
@@ -90,8 +95,8 @@ int main()
 
 
     //configura pwm dos LEDs vermelho e azul
-    sliceB = gpio_pwm_config(LED_B,DIV,WRAP,DUTY_C);//Biblioteca joystick_pwm.h
-    sliceR = gpio_pwm_config(LED_R,DIV,WRAP,DUTY_C);//Biblioteca joystick_pwm.h
+    sliceB = gpio_pwm_config(LED_B,DIV,WRAP,0.0);//Biblioteca joystick_pwm.h
+    sliceR = gpio_pwm_config(LED_R,DIV,WRAP,0.0);//Biblioteca joystick_pwm.h
     pwm_set_enabled(sliceB, pwm_function); //habilita o pwm no slice do led azul
     pwm_set_enabled(sliceR, pwm_function); //habilita o pwm no slice do led vermelho
 
@@ -123,7 +128,7 @@ int main()
         //Ler estado do botão do Joystick
         bool button_state = gpio_get(BUT_J);
 
-        //Definir Borda do display
+        //Definir Borda do display:
         ssd1306_fill(&ssd, !cor); // Limpa o display
 
         if(button_state){//Caso o botão do joystick não esteja pressionado
@@ -141,7 +146,7 @@ int main()
         ssd1306_rect(&ssd,posY,posX, 8, 8, cor,cor);//Atualizo com a nova posição
         ssd1306_send_data(&ssd);// Atualiza o conteúdo do display
 
-        //Atualizar PWM dos LEDs azul e vermelho
+        //Atualizar PWM dos LEDs azul e vermelho com base na posição do joystick
         if(pwm_function){
             if(joyX_value>=1800 && joyX_value<=2300){//Se estiver no centro
                 pwm_set_gpio_level(LED_R,0);
