@@ -46,7 +46,10 @@ static void gpio_irq_handler(uint gpio,uint32_t events){
         reset_usb_boot(0,0);
     }
 
+
     uint32_t current_time = to_us_since_boot(get_absolute_time());
+
+    //Botão A Controla a função de PWM dos LEDs Azul e vermelho
     if (current_time - last_timeA > 300000){ //debouncing
 
         last_timeA = current_time;
@@ -59,6 +62,7 @@ static void gpio_irq_handler(uint gpio,uint32_t events){
         }
     }
     
+    //Botão B controla estado do LED Verde
     if (current_time - last_timeJ > 300000){ //debouncing
         
         last_timeJ = current_time;
@@ -116,10 +120,22 @@ int main()
         adc_select_input(1); //Ler eixo X
         uint16_t joyX_value = adc_read(); 
         
-        //Atualizar posição do quadrado no display:
+        //Ler estado do botão do Joystick
+        bool button_state = gpio_get(BUT_J);
+
+        //Definir Borda do display
         ssd1306_fill(&ssd, !cor); // Limpa o display
-        ssd1306_rect(&ssd, 3,3, 124, 60, cor,!cor);//Desenha a borda
-        
+
+        if(button_state){//Caso o botão do joystick não esteja pressionado
+            ssd1306_rect(&ssd, 0,0, 127, 63, cor,!cor);//Desenha a borda padrão
+        }else{//Se estiver pressionado
+            ssd1306_rect(&ssd, 3,3, 121, 57, cor,!cor);//Desenha a borda maior
+            ssd1306_rect(&ssd, 2,2, 123, 59, cor,!cor);//Desenha a borda maior
+            ssd1306_rect(&ssd, 1,1, 125, 61, cor,!cor);//Desenha a borda maior
+            ssd1306_rect(&ssd, 0,0, 127, 63, cor,!cor);//Desenha a borda maior
+        }
+
+        //Atualizar posição do quadrado no display:
         uint posX = (joyX_value*115/4095)+4;//guarda o valor da pos x
         uint posY = 52-(joyY_value*48/4095);//guarda o valor da pos y
         ssd1306_rect(&ssd,posY,posX, 8, 8, cor,cor);//Atualizo com a nova posição
@@ -127,19 +143,19 @@ int main()
 
         //Atualizar PWM dos LEDs azul e vermelho
         if(pwm_function){
-            if(joyX_value>=1800 && joyX_value<=2300){
+            if(joyX_value>=1800 && joyX_value<=2300){//Se estiver no centro
                 pwm_set_gpio_level(LED_R,0);
-            }else if(joyX_value > 2300){
+            }else if(joyX_value > 2300){//Caso se movimente para Direita
                 pwm_set_gpio_level(LED_R,joyX_value-2300);
-            }else if(joyX_value <1800){
+            }else if(joyX_value <1800){//Caso se movimente para Esquerda
                 pwm_set_gpio_level(LED_R,1800-joyX_value);
             }
 
-            if(joyY_value>=1800 && joyY_value<=2300){
+            if(joyY_value>=1800 && joyY_value<=2300){//Se estiver no centro
                 pwm_set_gpio_level(LED_B,0);
-            }else if(joyY_value > 2300){
+            }else if(joyY_value > 2300){//Caso se movimente para Baixo
                 pwm_set_gpio_level(LED_B,joyY_value-2300);
-            }else if(joyY_value <1800){
+            }else if(joyY_value <1800){//Caso se movimente para Cima
                 pwm_set_gpio_level(LED_B,1800-joyY_value);
             }
 
