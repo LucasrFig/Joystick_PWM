@@ -223,3 +223,24 @@ void ssd1306_init_config_clean(ssd1306_t *ssd,uint SCL,uint SDA,i2c_inst_t *PORT
   ssd1306_fill(ssd,false);
   ssd1306_send_data(ssd);
 }
+
+void ssd1306_select_edge(ssd1306_t *ssd,uint type,bool cor){
+  switch (type)
+        {
+        case 1:
+            ssd1306_rect(ssd, 0,0, 127, 63, cor,!cor);//Desenha a borda padrão
+            break;
+        case 2:
+            ssd1306_rect(ssd, 3,3, 121, 57, cor,!cor);//Desenha a borda maior
+            ssd1306_rect(ssd, 2,2, 123, 59, cor,!cor);//Desenha a borda maior
+            ssd1306_rect(ssd, 1,1, 125, 61, cor,!cor);//Desenha a borda maior
+            ssd1306_rect(ssd, 0,0, 127, 63, cor,!cor);//Desenha a borda maior
+            break;
+        case 3:
+            ssd1306_rect(ssd, 0,0, 127, 63, cor,!cor);//Desenha a borda maior
+            ssd1306_rect(ssd, 2,2, 123, 59, cor,!cor);//Desenha a borda maior
+            ssd1306_rect(ssd, 4,4, 119, 55, cor,!cor);//Desenha a borda maior
+            ssd1306_rect(ssd, 6,6, 115, 51, cor,!cor);//Desenha a borda maior
+            break;
+        }  
+}

@@ -40,6 +40,7 @@ bool pwm_function = true;//Variável que permite o joystick controlar intensidad
 uint sliceB;//Slice PWM azul
 uint sliceR;//Slice PWM vermelho
 bool ledg_state = false;//Indica estado atual do led verde
+uint borda = 1;
 
 
 //Rotina de Interrupção
@@ -76,6 +77,11 @@ static void gpio_irq_handler(uint gpio,uint32_t events){
             ledg_state = !ledg_state;
             gpio_put(LED_G,ledg_state);
             printf("%s\n",ledg_state?"LED VERDE ATIVADO":"LED VERDE DESATIVADO");//Para debug
+            if(borda<3){
+                borda++;
+            }else{
+                borda = 1;
+            }
         }
     }
 
@@ -130,15 +136,7 @@ int main()
 
         //Definir Borda do display:
         ssd1306_fill(&ssd, !cor); // Limpa o display
-
-        if(button_state){//Caso o botão do joystick não esteja pressionado
-            ssd1306_rect(&ssd, 0,0, 127, 63, cor,!cor);//Desenha a borda padrão
-        }else{//Se estiver pressionado
-            ssd1306_rect(&ssd, 3,3, 121, 57, cor,!cor);//Desenha a borda maior
-            ssd1306_rect(&ssd, 2,2, 123, 59, cor,!cor);//Desenha a borda maior
-            ssd1306_rect(&ssd, 1,1, 125, 61, cor,!cor);//Desenha a borda maior
-            ssd1306_rect(&ssd, 0,0, 127, 63, cor,!cor);//Desenha a borda maior
-        }
+        ssd1306_select_edge(&ssd,borda,cor);
 
         //Atualizar posição do quadrado no display:
         uint posX = (joyX_value*115/4095)+4;//guarda o valor da pos x
