@@ -242,5 +242,15 @@ void ssd1306_select_edge(ssd1306_t *ssd,uint type,bool cor){
             ssd1306_rect(ssd, 4,4, 119, 55, cor,!cor);//Desenha a borda maior
             ssd1306_rect(ssd, 6,6, 115, 51, cor,!cor);//Desenha a borda maior
             break;
+        case 4:
+            ssd1306_rect(ssd, 0,0, 127, 5, cor,!cor);//Desenha a borda maior
+            ssd1306_rect(ssd, 59,4, 123, 5, cor,!cor);//Desenha a borda maior
+            for(uint posy = 8;posy<56;posy+=8){
+              ssd1306_draw_char(ssd,'0',0,posy);
+            }
+            for(uint posy = 8;posy<56;posy+=8){
+              ssd1306_draw_char(ssd,'0',119,posy);
+            }
+            break;
         }  
 }

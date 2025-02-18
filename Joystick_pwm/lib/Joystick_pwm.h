@@ -26,4 +26,26 @@ uint gpio_pwm_config(uint gpio, float divisor,uint wrap,uint dutycycle){
     
     return slice;
 }
+
+void set_pwm_level_on_leds(bool pwm_function, uint X_value, uint Y_value, uint gpio_red, uint gpio_blue){
+    if(pwm_function){
+        if(X_value>=1800 && X_value<=2300){//Se estiver no centro
+            pwm_set_gpio_level(gpio_red,0);
+        }else if(X_value > 2300){//Caso se movimente para Direita
+            pwm_set_gpio_level(gpio_red,X_value-2300);
+        }else if(X_value <1800){//Caso se movimente para Esquerda
+            pwm_set_gpio_level(gpio_red,1800-X_value);
+        }
+
+        if(Y_value>=1800 && Y_value<=2300){//Se estiver no centro
+            pwm_set_gpio_level(gpio_blue,0);
+        }else if(Y_value > 2300){//Caso se movimente para Baixo
+            pwm_set_gpio_level(gpio_blue,Y_value-2300);
+        }else if(Y_value <1800){//Caso se movimente para Cima
+            pwm_set_gpio_level(gpio_blue,1800-Y_value);
+        }
+    }else{
+        
+    }
+}
 #endif //JOYSTICK_H

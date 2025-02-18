@@ -13,7 +13,6 @@
 //Definir macros
 #define joyX 27
 #define joyY 26
-#define sensibilidade 50
 #define I2C_LINK 0x3C
 #define I2C_PORT i2c1
 #define I2C_SDA 14
@@ -65,9 +64,9 @@ static void gpio_irq_handler(uint gpio,uint32_t events){
             pwm_set_enabled(sliceB, pwm_function); //habilita/desabilita o pwm no slice do led azul
             pwm_set_enabled(sliceR, pwm_function); //habilita/desabilita o pwm no slice do led vermelho
             printf("%s\n",pwm_function?"PWM ATIVADO":"PWM DESATIVADO");//Para debug
+            printf("======================================\n");
         }
-    }
-    
+    }  
     //Botão B controla estado do LED Verde
     if (current_time - last_timeJ > 300000){ //debouncing
         
@@ -77,7 +76,8 @@ static void gpio_irq_handler(uint gpio,uint32_t events){
             ledg_state = !ledg_state;
             gpio_put(LED_G,ledg_state);
             printf("%s\n",ledg_state?"LED VERDE ATIVADO":"LED VERDE DESATIVADO");//Para debug
-            if(borda<3){
+            printf("======================================\n");
+            if(borda<4){
                 borda++;
             }else{
                 borda = 1;
@@ -129,10 +129,7 @@ int main()
         adc_select_input(0); //Ler eixo Y
         uint16_t joyY_value = adc_read(); 
         adc_select_input(1); //Ler eixo X
-        uint16_t joyX_value = adc_read(); 
-        
-        //Ler estado do botão do Joystick
-        bool button_state = gpio_get(BUT_J);
+        uint16_t joyX_value = adc_read();
 
         //Definir Borda do display:
         ssd1306_fill(&ssd, !cor); // Limpa o display
@@ -145,30 +142,15 @@ int main()
         ssd1306_send_data(&ssd);// Atualiza o conteúdo do display
 
         //Atualizar PWM dos LEDs azul e vermelho com base na posição do joystick
-        if(pwm_function){
-            if(joyX_value>=1800 && joyX_value<=2300){//Se estiver no centro
-                pwm_set_gpio_level(LED_R,0);
-            }else if(joyX_value > 2300){//Caso se movimente para Direita
-                pwm_set_gpio_level(LED_R,joyX_value-2300);
-            }else if(joyX_value <1800){//Caso se movimente para Esquerda
-                pwm_set_gpio_level(LED_R,1800-joyX_value);
-            }
+        set_pwm_level_on_leds(pwm_function,joyX_value,joyY_value,LED_R,LED_B);//Biblioteca Joystick_pwm.h
 
-            if(joyY_value>=1800 && joyY_value<=2300){//Se estiver no centro
-                pwm_set_gpio_level(LED_B,0);
-            }else if(joyY_value > 2300){//Caso se movimente para Baixo
-                pwm_set_gpio_level(LED_B,joyY_value-2300);
-            }else if(joyY_value <1800){//Caso se movimente para Cima
-                pwm_set_gpio_level(LED_B,1800-joyY_value);
-            }
-
-        }
-
-        //Escrever info do ADC:
+        //Escrever info do ADC no monitor serial:
         uint32_t current_time = to_ms_since_boot(get_absolute_time()); 
         if((current_time - last_print_time)>=1000){
-            printf("posicao X: %d |posição Y: %d\n",posX,posY);
-            printf("VRX: %u | VRY: %u\n",joyX_value,joyY_value);
+            printf("posicao X: %d |posição Y: %d\n",posX,posY);//posição display
+            printf("VRX: %u | VRY: %u\n",joyX_value,joyY_value);//posição adc
+            printf("Borda atual: %d\n",borda);
+            printf("======================================\n");
             last_print_time = current_time;
         }
     }
