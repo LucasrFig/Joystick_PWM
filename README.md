@@ -1,5 +1,5 @@
 ──────────────────────────────────────────────────────────────────────  
-# PROJETO - Joystick PWM - Controle de objetos no display via joystick
+# ATIVIDADE - Joystick PWM - Controle de objetos no display via joystick
 (SUB GRUPO 6)  
 **Aluno: Lucas Ricardo de Lima Figueiredo** 
 
@@ -11,6 +11,7 @@ O objetivo dessa atividade é desenvolver um sistema que permita identificar a p
 ──────────────────────────────────────────────────────────────────────  
 ## FUNÇÕES IMPLEMENTADAS
 ──────────────────────────────────────────────────────────────────────
+
 Aqui vão algumas funções implementadas que valem a pena mencionar:
 - `ssd1306_init_config_clean()`:Inicializa e configura o i2c além de limpar a tela do display;
 - `ssd1306_select_edge()`:Recebe um inteiro de 1 a 4 e envia a borda que será apresentada no display;
@@ -20,7 +21,7 @@ Aqui vão algumas funções implementadas que valem a pena mencionar:
   
 
 ──────────────────────────────────────────────────────────────────────  
-## FUNCIONALIDADES DO PROJETO  
+## FUNCIONALIDADES DA ATIVIDADE  
 ──────────────────────────────────────────────────────────────────────  
 
 **Controles na plaquinha Bit Dog Lab:**  
@@ -67,7 +68,7 @@ O programa segue a seguinte estrutura:
   Copie o arquivo .uf2 gerado para a unidade de armazenamento da Pico.
 
 ──────────────────────────────────────────────────────────────────────  
-## VÍDEO DO PROJETO  
+## VÍDEO DA ATIVIDADE 
 ────────────────────────────────────────────────────────────────────── 
 [https://drive.google.com/file/d/1Nf9n1o1f_lvU9id5cwCZaTa_hdpXrth7/view?usp=drivesdk
 ](https://drive.google.com/file/d/1Nf9n1o1f_lvU9id5cwCZaTa_hdpXrth7/view?usp=drivesdk)
